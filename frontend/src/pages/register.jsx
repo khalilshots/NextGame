@@ -13,7 +13,7 @@ export default function RegisterPage() {
   const handleSubmit = async e => {
     e.preventDefault()
     try {
-      await registerUser(username, password)
+      await registerUser({ username, password })
       console.log("Successful Login attempt with:", { username, password })
     } catch (error) {
       console.error("Login error:", error)
