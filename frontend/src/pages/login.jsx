@@ -5,17 +5,21 @@ import { Label } from "../components/ui/label"
 import { Checkbox } from "../components/ui/checkbox"
 import { Link } from 'react-router-dom'
 import { loginUser } from '../api/auth'
+import { useNavigate } from 'react-router-dom'
 
 
 export default function LoginPage() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [rememberMe, setRememberMe] = useState(false)
+  const navigate = useNavigate()
 
   const handleSubmit = async e => {
     e.preventDefault()
     try {
-      await loginUser(username, password)
+      const data = await loginUser(username, password)
+      localStorage.setItem('token', data.access_token)
+      navigate('/home')
       console.log("Successful Login attempt with:", { username, rememberMe })
     } catch (error) {
       console.error("Login error:", error)
