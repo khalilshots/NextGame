@@ -24,7 +24,6 @@ export default function LoginPage() {
       console.error("Login error:", error)
       alert("Login failed: " + (error?.message || "Please try again."))
     }
-    console.log("Form submitted with:", { username, password, rememberMe })
   }
 
   return (
