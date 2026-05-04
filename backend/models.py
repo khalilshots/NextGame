@@ -36,6 +36,6 @@ class CheckIn(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     user: Mapped["User"] = relationship("User")
     court_id: Mapped[int] = mapped_column(ForeignKey("courts.id"))
-    checkin_time: Mapped[datetime] = mapped_column(default=datetime.now(timezone.utc))
+    checkin_time: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
     checkedout_time: Mapped[Optional[datetime]] = mapped_column(default=None)
     created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))

@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import axios from 'axios'
 
-const BASE_URL = 'http://localhost:8000'
+const BASE_URL = import.meta.env.VITE_API_URL
 
 function RequestCourtModal({ coords, onClose }) {
   const [name, setName] = useState('')

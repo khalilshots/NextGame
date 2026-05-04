@@ -1,10 +1,17 @@
 # schemas.py
 from pydantic import BaseModel
+from pydantic import field_validator
 
 
 class RegisterRequest(BaseModel):
     username: str
     password: str
+
+    @field_validator('password')
+    def password_length(cls, v):
+        if len(v) < 6:
+            raise ValueError('Password must be at least 6 characters')
+        return v
 
 
 class CourtRequest(BaseModel):

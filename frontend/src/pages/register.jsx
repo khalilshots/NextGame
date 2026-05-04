@@ -4,22 +4,26 @@ import { Input } from "../components/ui/input"
 import { Label } from "../components/ui/label"
 import { Link } from 'react-router-dom'
 import { registerUser } from '../api/auth'
+import { useNavigate } from 'react-router-dom'
 
 export default function RegisterPage() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const navigate = useNavigate()
 
   const handleSubmit = async e => {
     e.preventDefault()
     try {
+      if (password !== confirmPassword) {
+        alert("Passwords don't match")
+      return
+    }
       await registerUser({ username, password })
-      console.log("Successful Login attempt with:", { username, password })
+      navigate('/home')
     } catch (error) {
-      console.error("Login error:", error)
       alert("Login failed: " + (error?.message || "Please try again."))
     }
-    console.log("Form submitted with:", { username, password, confirmPassword })
   }
 
   return (
@@ -36,11 +40,11 @@ export default function RegisterPage() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="username" className="text-sm text-gray-700">
-            E-mail
+            Username
           </Label>
           <Input
             id="username"
-            type="username"
+            type="text"
             placeholder="example@gmail.com"
             value={username}
             onChange={e => setUsername(e.target.value)}

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar'
 
-const BASE_URL = 'http://localhost:8000'
+const BASE_URL = import.meta.env.VITE_API_URL
 
 const authHeaders = () => ({
   headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
@@ -20,10 +20,7 @@ const getMyCheckins = async () => {
 }
 
 const updateProfile = async ({ bio, profile_picture }) => {
-  const params = new URLSearchParams()
-  if (bio !== undefined) params.append('bio', bio)
-  if (profile_picture !== undefined) params.append('profile_picture', profile_picture)
-  const res = await axios.patch(`${BASE_URL}/users/me?${params.toString()}`, {}, authHeaders())
+  const res = await axios.patch(`${BASE_URL}/users/me`, { bio, profile_picture }, authHeaders())
   return res.data
 }
 
@@ -56,7 +53,7 @@ export default function ProfilePage() {
       }
     }
     load()
-  }, [])
+  }, [navigate])
 
   const handleSaveBio = async () => {
     try {

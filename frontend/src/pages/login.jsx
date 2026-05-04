@@ -20,7 +20,6 @@ export default function LoginPage() {
       const data = await loginUser(username, password)
       localStorage.setItem('token', data.access_token)
       navigate('/home')
-      console.log("Successful Login attempt with:", { username, rememberMe })
     } catch (error) {
       console.error("Login error:", error)
       alert("Login failed: " + (error?.message || "Please try again."))

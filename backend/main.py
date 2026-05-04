@@ -207,7 +207,10 @@ def update_court_status(court_id: int, status: str, db: db_dependency, current_u
     court = db.query(Court).filter(Court.id == court_id).first()
     if not court:
         raise HTTPException(status_code=404)
-    court.status = status  # "approved" or "rejected"
+    if status not in ("approved", "rejected", "pending"):
+        raise HTTPException(status_code=400, detail="Invalid status")
+    else:
+        court.status = status  # "approved" or "rejected"
     db.commit()
     return court
 

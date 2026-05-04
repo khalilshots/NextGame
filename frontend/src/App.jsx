@@ -17,9 +17,9 @@ function App() {
       <Route path="/home" element={<ProtectedRoute><MenuPage/></ProtectedRoute>} />
       <Route path="/courts" element={<ProtectedRoute><CourtsMap/></ProtectedRoute>} />
       <Route path="/courts/:id" element={<ProtectedRoute><CourtDetail/></ProtectedRoute>} />
-      <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><ProfilePage/></ProtectedRoute>} />
       
-      <Route path="/admin" element={<AdminPage />} />
+      <Route path="/admin" element={<ProtectedRoute><AdminPage/></ProtectedRoute>} />
     </Routes>
   )
 }
