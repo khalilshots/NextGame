@@ -27,7 +27,7 @@ db_dependency = Annotated[Session, Depends(get_db)]
 origins = [
     "http://localhost:5173"
     "https://nextgame.me",
-    "https://next-game-eml6bikka-khalils-projects-d3e0dabd.vercel.app",
+    "https://next-game-eml6bikka-khalils-projects-d3e0dabd.vercel.app",#remove this and the button one once the domain is active
     "https://next-game-git-main-khalils-projects-d3e0dabd.vercel.app",
 
 ]
