@@ -45,7 +45,7 @@ export default function RegisterPage() {
           <Input
             id="username"
             type="text"
-            placeholder="example@gmail.com"
+            placeholder="username"
             value={username}
             onChange={e => setUsername(e.target.value)}
             className="bg-gray-50"
