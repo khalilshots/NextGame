@@ -13,8 +13,10 @@ and request new courts in your area.
 
 ## Tech stack
 
-**Backend** — FastAPI, SQLAlchemy, SQLite (dev) / PostgreSQL (prod)  
-**Frontend** — React, Vite, Tailwind CSS, Mapbox GL
+**Backend** — FastAPI, SQLAlchemy, PostgreSQL  
+**Frontend** — React, Vite, Tailwind CSS, Mapbox GL  
+**Deployment** — Backend on Railway, Frontend on Vercel  
+**Domain** — nextgame.me via Namecheap
 
 ## Running locally
 
@@ -30,7 +32,6 @@ pip install -r requirements.txt
 Create a `.env` file in the `backend/` folder:
 ```
 SECRET_KEY=your_secret_key_here
-DATABASE_URL=sqlite:///./NEXTGAME.db
 ```
 
 ```bash
@@ -39,7 +40,7 @@ uvicorn main:app --reload
 
 Seed the database with courts:
 ```bash
-python seeds/seed.py
+python seed.py
 ```
 
 API runs at `http://localhost:8000`  
@@ -66,14 +67,16 @@ App runs at `http://localhost:5173`
 
 ## Deployment
 
-- **Frontend** — Vercel (connect GitHub repo, set env variables in dashboard)
-- **Backend** — Railway (connect GitHub repo, add PostgreSQL plugin, set env variables)
+- **Frontend** — Vercel (connected to GitHub, auto-deploys on push)
+- **Backend** — Railway (connected to GitHub, auto-deploys on push)
+- **Database** — PostgreSQL on Railway
+- **Domain** — nextgame.me registered via Namecheap Student Pack
 
 ## Environment variables
 
 | Variable | Where | Description |
 |---|---|---|
-| `SECRET_KEY` | backend | JWT signing key — generate with `python -c "import secrets; print(secrets.token_hex(32))"` |
-| `DATABASE_URL` | backend | PostgreSQL connection string (Railway provides this) |
+| `SECRET_KEY` | backend | JWT signing key |
+| `DATABASE_URL` | backend (Railway injects automatically) | PostgreSQL connection string |
 | `VITE_MAPBOX_TOKEN` | frontend | Mapbox public token (starts with `pk.`) |
 | `VITE_API_URL` | frontend | Backend URL |
