@@ -43,7 +43,10 @@ app.add_middleware(
 
 
 @app.post("/auth/register")
-def register(data: RegisterRequest, db: db_dependency): 
+def register(data: RegisterRequest, db: db_dependency):
+    existing = db.query(User).filter(User.username == data.username).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Username already taken")
     hashed = hash_password(data.password)
     user = User(username=data.username, hashed_password=hashed)
     db.add(user)
