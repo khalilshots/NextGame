@@ -227,7 +227,7 @@ def update_profile(data: schemas.UserUpdate, db: db_dependency, current_user: Us
     db.commit()
     return current_user
 
-@app.post("/admin/seed") 
+@app.post("/admin/seed") #comment
 def seed_courts(db: db_dependency):
     from models import Court
     courts = [
