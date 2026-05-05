@@ -26,6 +26,8 @@ db_dependency = Annotated[Session, Depends(get_db)]
 
 origins = [
     "http://localhost:5173"
+    "https://nextgame.me",
+
 ]
 
 
