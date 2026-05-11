@@ -10,13 +10,15 @@ export default function RegisterPage() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [error, setError] = useState(null)
+
   const navigate = useNavigate()
 
   const handleSubmit = async e => {
     e.preventDefault()
     try {
       if (password !== confirmPassword) {
-        alert("Passwords don't match")
+        setError("Passwords don't match")
       return
     }
       const data = await registerUser({ username, password })
@@ -24,16 +26,16 @@ export default function RegisterPage() {
       navigate('/home')
       } catch (error) {
         
-        const detail = error?.response?.data?.detail
-        console.error("Registration error:", error)
-        if (Array.isArray(detail)) {
-          // Pydantic validation error — extract the message
-          alert(detail[0]?.msg || 'Registration failed')
-        } else {
-          alert(detail || 'Registration failed. Please try again.')
-        }
+      const detail = error?.response?.data?.detail
+      if (Array.isArray(detail)) {
+        setError(detail[0]?.msg || 'Registration failed')
+      } else if (error?.response?.status === 400) {
+        setError('Username already taken')
+      } else {
+        setError(detail || 'Something went wrong. Please try again.')
       }
-  }
+    }}
+
 const handleGuest = () => {
   navigate('/courts')
 }
@@ -93,7 +95,11 @@ const handleGuest = () => {
             required
           />
         </div>
-
+    {error && (
+      <p className="text-red-500 text-sm text-center">
+        {error}
+      </p>
+    )}
         {/* Submit Button */}
         <Button
           type="submit"

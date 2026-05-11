@@ -12,19 +12,25 @@ export default function LoginPage() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [rememberMe, setRememberMe] = useState(false)
+  const [error, setError] = useState(null)
   const navigate = useNavigate()
 
-  const handleSubmit = async e => {
-    e.preventDefault()
-    try {
-      const data = await loginUser(username, password)
-      localStorage.setItem('token', data.access_token)
-      navigate('/home')
-    } catch (error) {
-      console.error("Login error:", error)
-      alert("Login failed: " + (error?.message || "Please try again."))
+const handleSubmit = async e => {
+  e.preventDefault()
+  setError(null)
+  try {
+    const data = await loginUser(username, password)
+    localStorage.setItem('token', data.access_token)
+    navigate('/home')
+  } catch (error) {
+    const detail = error?.response?.data?.detail
+    if (error?.response?.status === 401) {
+      setError('Incorrect username or password')
+    } else {
+      setError(detail || 'Something went wrong. Please try again.')
     }
   }
+}
 const handleGuest = () => {
   navigate('/courts')
 }
@@ -83,8 +89,12 @@ const handleGuest = () => {
             Remember me
           </label>
         </div>
-
-        {/* Submit Button */}
+    {error && (
+      <p className="text-red-500 text-sm text-center">
+        {error}
+      </p>
+    )}
+            {/* Submit Button */}
         <Button
           type="submit"
           className="w-full bg-teal-900 hover:bg-teal-800 text-white"
