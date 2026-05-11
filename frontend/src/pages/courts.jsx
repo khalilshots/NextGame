@@ -186,8 +186,8 @@ useEffect(() => {
     if (!locationFound) {
       console.log("Location timed out, using default.");
     setUserLocation({
-      latitude: 33.9716,
-      longitude: -6.8498,
+      latitude: 33.96813,
+      longitude: -6.88544,
       zoom: 12
     });
     }
@@ -210,8 +210,8 @@ useEffect(() => {
       if (!locationFound) {
         clearTimeout(timer);
     setUserLocation({
-      latitude: 33.9716,
-      longitude: -6.8498,
+      latitude: 33.96813,
+      longitude: -6.88544,
       zoom: 12
     });
       }
