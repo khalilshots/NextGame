@@ -71,42 +71,60 @@ export default function CourtDetail() {
     setTimeout(() => setToast(null), 3000)
   }
 
-  useEffect(() => {
-    const load = async () => {
+    useEffect(() => {
+      const load = async () => {
+        try {
+          setLoading(true)
+          const courtData = await getCourtsById(id)
+          setCourt(courtData)
+          setPlayers(courtData.players ?? [])
+
+          // Only fetch user if logged in
+          const token = localStorage.getItem('token')
+          if (token) {
+            try {
+              const meData = await getMe()
+              setMe(meData)
+              setIsCheckedIn((courtData.players ?? []).includes(meData.username))
+            } catch {
+              // token expired or invalid — treat as logged out
+              setMe(null)
+            }
+          }
+        } catch (err) {
+          setError('Failed to load court details.')
+          console.error(err)
+        } finally {
+          setLoading(false)
+        }
+      }
+      load()
+    }, [id])
+
+
+    const handleCheckIn = async () => {
+      const token = localStorage.getItem('token')
+      if (!token) {
+        navigate('/login')
+        return
+      }
       try {
-        setLoading(true)
-        const [courtData, meData] = await Promise.all([
-          getCourtsById(id),
-          getMe()
-        ])
-        setCourt(courtData)
-        setMe(meData)
-        setPlayers(courtData.players ?? [])
-        setIsCheckedIn((courtData.players ?? []).includes(meData.username))
+        setActionLoading(true)
+        await checkIn(id)
+        setIsCheckedIn(true)
+        setPlayers(prev => [me.username, ...prev])
+        showToast('✅ Checked in — enjoy the run!')
       } catch (err) {
-        setError('Failed to load court details.')
-        console.error(err)
+        if (err?.response?.status === 401) {
+          navigate('/login')
+          return
+        }
+        const msg = err?.response?.data?.detail || 'Check-in failed.'
+        showToast(`❌ ${msg}`)
       } finally {
-        setLoading(false)
+        setActionLoading(false)
       }
     }
-    load()
-  }, [id])
-
-  const handleCheckIn = async () => {
-    try {
-      setActionLoading(true)
-      await checkIn(id)
-      setIsCheckedIn(true)
-      setPlayers(prev => [me.username, ...prev])
-      showToast('✅ Checked in — enjoy the run!')
-    } catch (err) {
-      const msg = err?.response?.data?.detail || 'Check-in failed.'
-      showToast(`❌ ${msg}`)
-    } finally {
-      setActionLoading(false)
-    }
-  }
 
   const handleCheckOut = async () => {
     try {
@@ -263,15 +281,17 @@ export default function CourtDetail() {
 
       {/* ── BOTTOM: Check In / Check Out ── */}
       <div className="px-4 pb-8 pt-3 bg-gray-100 border-t border-gray-200 flex flex-col gap-2.5">
-        {!isCheckedIn ? (
-          <button
-            onClick={handleCheckIn}
-            disabled={actionLoading}
-            className="w-full py-4 rounded-2xl bg-teal-900 hover:bg-teal-800 text-white text-base font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            🏀 Check In
-          </button>
-        ) : (
+            {!localStorage.getItem('token') ? (
+              <button onClick={() => navigate('/login')}
+                className="w-full py-4 rounded-2xl bg-teal-900 text-white text-base font-bold">
+                🔒 Login to Check In
+              </button>
+            ) : !isCheckedIn ? (
+              <button onClick={handleCheckIn} disabled={actionLoading}
+                className="w-full py-4 rounded-2xl bg-teal-900 text-white text-base font-bold">
+                🏀 Check In
+              </button>
+            ) : (
           <>
             <div className="w-full py-4 rounded-2xl bg-teal-100 text-teal-800 text-base font-bold flex items-center justify-center gap-2">
               ✓ Checked In

@@ -19,9 +19,15 @@ export default function Sidebar({ open, onClose }) {
   const navigate = useNavigate()
   const location = useLocation()
   const [isAdmin, setIsAdmin] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   useEffect(() => {
-    getMe().then(user => setIsAdmin(user.is_admin)).catch(() => {})
+    getMe()
+      .then(user => {
+        setIsLoggedIn(true)
+        setIsAdmin(user.is_admin)
+      })
+      .catch(() => setIsLoggedIn(false))
   }, [])
 
   const navItems = [
@@ -110,21 +116,23 @@ export default function Sidebar({ open, onClose }) {
         )}
 
         {/* Logout */}
-        <div className="px-4 pb-12 border-t border-white/10 pt-4">
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-4 w-full px-4 py-3.5 rounded-2xl text-left
-              text-red-400/80 hover:bg-red-500/10 hover:text-red-400 transition-colors text-sm font-medium"
-          >
-            <span
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
-              style={{ background: 'rgba(255,80,80,0.1)' }}
+        {isLoggedIn && (
+          <div className="px-4 pb-12 border-t border-white/10 pt-4">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-4 w-full px-4 py-3.5 rounded-2xl text-left
+                text-red-400/80 hover:bg-red-500/10 hover:text-red-400 transition-colors text-sm font-medium"
             >
-              🚪
-            </span>
-            Log out
-          </button>
-        </div>
+              <span
+                className="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
+                style={{ background: 'rgba(255,80,80,0.1)' }}
+              >
+                🚪
+              </span>
+              Log out
+            </button>
+          </div>
+        )}
         
       </div>
     </>

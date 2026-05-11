@@ -19,11 +19,20 @@ export default function RegisterPage() {
         alert("Passwords don't match")
       return
     }
-      await registerUser({ username, password })
+      const data = await registerUser({ username, password })
+      localStorage.setItem('token', data?.access_token)
       navigate('/home')
-    } catch (error) {
-      alert("Login failed: " + (error?.message || "Please try again."))
-    }
+      } catch (error) {
+        
+        const detail = error?.response?.data?.detail
+        console.error("Registration error:", error)
+        if (Array.isArray(detail)) {
+          // Pydantic validation error — extract the message
+          alert(detail[0]?.msg || 'Registration failed')
+        } else {
+          alert(detail || 'Registration failed. Please try again.')
+        }
+      }
   }
 
   return (

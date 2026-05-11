@@ -11,12 +11,12 @@ import ProfilePage from './pages/profile'
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<LoginPage/>} />
+      <Route path="/" element={<CourtsMap/>} />
       <Route path="/login" element={<LoginPage/>} />
       <Route path="/register" element={<RegisterPage/>} />
-      <Route path="/home" element={<ProtectedRoute><MenuPage/></ProtectedRoute>} />
-      <Route path="/courts" element={<ProtectedRoute><CourtsMap/></ProtectedRoute>} />
-      <Route path="/courts/:id" element={<ProtectedRoute><CourtDetail/></ProtectedRoute>} />
+      <Route path="/home" element={<MenuPage/>} />
+      <Route path="/courts" element={<CourtsMap/>} />
+      <Route path="/courts/:id" element={<CourtDetail/>} />
       <Route path="/profile" element={<ProtectedRoute><ProfilePage/></ProtectedRoute>} />
       
       <Route path="/admin" element={<ProtectedRoute><AdminPage/></ProtectedRoute>} />

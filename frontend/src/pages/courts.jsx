@@ -13,9 +13,16 @@ function RequestCourtModal({ coords, onClose }) {
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState(null)
-
+  const navigate = useNavigate()
   const handleSubmit = async (e) => {
     e.preventDefault()
+    const token = localStorage.getItem('token')
+      console.log('token:', token)
+  console.log('BASE_URL:', BASE_URL)
+    if (!token) {
+      navigate('/login')
+      return
+    }
     try {
       setSubmitting(true)
       const token = localStorage.getItem('token')
@@ -169,19 +176,51 @@ export default function CourtsMap() {
       .catch(err => console.error(err))
   }, [])
 
-  useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setUserLocation({
-          longitude: pos.coords.longitude,
-          latitude: pos.coords.latitude,
-          zoom: 12
-        });
-      },
-      (err) => console.error("Location denied or error:", err),
-      { enableHighAccuracy: true }
-    );
-  }, []);
+useEffect(() => {
+  let locationFound = false;
+
+  // 1. Set the 8-second timeout for the fallback
+  const timer = setTimeout(() => {
+    if (!locationFound) {
+      console.log("Location timed out, using default.");
+    setUserLocation({
+      latitude: 33.9716,
+      longitude: -6.8498,
+      zoom: 12
+    });
+    }
+  }, 8000);
+
+  // 2. Start the location request
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      locationFound = true; // Mark as found so the timeout does nothing
+      clearTimeout(timer);  // Stop the timer immediately
+      setUserLocation({
+        longitude: pos.coords.longitude,
+        latitude: pos.coords.latitude,
+        zoom: 12
+      });
+    },
+    (err) => {
+      console.error("Location error:", err);
+      // Optional: Trigger fallback immediately on error instead of waiting
+      if (!locationFound) {
+        clearTimeout(timer);
+    setUserLocation({
+      latitude: 33.9716,
+      longitude: -6.8498,
+      zoom: 12
+    });
+      }
+    },
+    { enableHighAccuracy: true }
+  );
+
+  // 3. Cleanup to prevent memory leaks or state updates on unmounted components
+  return () => clearTimeout(timer);
+}, []);
+
 
   const initialViewState = useMemo(() => userLocation, [userLocation]);
 

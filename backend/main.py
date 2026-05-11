@@ -27,8 +27,6 @@ db_dependency = Annotated[Session, Depends(get_db)]
 origins = [
     "http://localhost:5173",
     "https://nextgame.me",
-    "https://next-game-eml6bikka-khalils-projects-d3e0dabd.vercel.app",#remove this and the button one once the domain is active
-    "https://next-game-git-main-khalils-projects-d3e0dabd.vercel.app",
 
 ]
 
@@ -51,6 +49,8 @@ def register(data: RegisterRequest, db: db_dependency):
     user = User(username=data.username, hashed_password=hashed)
     db.add(user)
     db.commit()
+    token = create_access_token({"sub": user.username})
+    return {"access_token": token, "token_type": "bearer"}
 
 @app.post("/auth/token")
 def login(db: db_dependency, form_data: OAuth2PasswordRequestForm = Depends()):
