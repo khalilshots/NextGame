@@ -34,7 +34,9 @@ export default function RegisterPage() {
         }
       }
   }
-
+const handleGuest = () => {
+  navigate('/courts')
+}
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
     <div className="w-full max-w-md p-8 bg-white rounded-lg">
@@ -99,8 +101,18 @@ export default function RegisterPage() {
         >
           Create Account
         </Button>
+        
+        <Button onClick={handleGuest}
+          className="w-full bg-gray-300 hover:bg-gray-400 text-gray-700"
+        >
+          Continue as Guest
+        </Button>
+        
       </form>
+      
     </div>
+    
     </div>
+
   )
 }
