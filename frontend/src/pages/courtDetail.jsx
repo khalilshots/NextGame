@@ -3,6 +3,7 @@ import { getCourtsById } from '../api/courts'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar'
+import { ChevronLeft, Camera, Check, LogIn, LogOut } from 'lucide-react'
 
 const BASE_URL = import.meta.env.VITE_API_URL
 
@@ -177,7 +178,7 @@ export default function CourtDetail() {
             onClick={() => navigate('/courts')}
             className="w-9 h-9 rounded-full bg-black/40 backdrop-blur flex items-center justify-center text-white text-lg hover:bg-black/60 transition-colors"
           >
-            ‹
+              <ChevronLeft size={20} color="white" />
           </button>
           <button
             onClick={() => setSidebarOpen(true)}
@@ -213,7 +214,8 @@ export default function CourtDetail() {
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-teal-950 to-teal-800">
             <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-3xl">
-              📸
+                <Camera size={28} className="text-white/50" />
+
             </div>
             <p className="text-white/50 text-sm">No photos yet</p>
             <button className="px-5 py-2 rounded-full border border-white/30 bg-white/10 text-white text-sm font-semibold backdrop-blur hover:bg-white/20 transition-colors">
@@ -283,8 +285,9 @@ export default function CourtDetail() {
       <div className="px-4 pb-8 pt-3 bg-gray-100 border-t border-gray-200 flex flex-col gap-2.5">
             {!localStorage.getItem('token') ? (
               <button onClick={() => navigate('/login')}
-                className="w-full py-4 rounded-2xl bg-teal-900 text-white text-base font-bold">
-                🔒 Login to Check In
+                className="w-full py-4 rounded-2xl bg-teal-900 text-white text-base font-bold flex items-center justify-center gap-2 ">
+                  <LogIn size={20} />
+                  Login to Check In
               </button>
             ) : !isCheckedIn ? (
               <button onClick={handleCheckIn} disabled={actionLoading}
@@ -294,14 +297,14 @@ export default function CourtDetail() {
             ) : (
           <>
             <div className="w-full py-4 rounded-2xl bg-teal-100 text-teal-800 text-base font-bold flex items-center justify-center gap-2">
-              ✓ Checked In
+                <Check size={20} />Checked In
             </div>
             <button
               onClick={handleCheckOut}
               disabled={actionLoading}
               className="w-full py-3.5 rounded-2xl border border-red-200 bg-red-50 text-red-600 text-sm font-semibold hover:bg-red-100 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              🚪 Check Out
+                <LogOut size={18} className="text-red-500" /> Check Out
             </button>
           </>
         )}

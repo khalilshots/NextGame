@@ -5,6 +5,8 @@ import { getCourts } from '../api/courts'
 import { useNavigate } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import axios from 'axios'
+import { MapPin, Menu } from 'lucide-react'
+
 
 const BASE_URL = import.meta.env.VITE_API_URL
 
@@ -255,11 +257,8 @@ useEffect(() => {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
         >
-          <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
-            <rect width="16" height="2" rx="1" fill="white"/>
-            <rect y="5" width="11" height="2" rx="1" fill="white"/>
-            <rect y="10" width="16" height="2" rx="1" fill="white"/>
-          </svg>
+        <Menu size={18} color="white" />
+
         </button>
 
         {/* Double-tap hint */}
@@ -278,7 +277,8 @@ useEffect(() => {
 
         {/* User location marker */}
         <Marker latitude={userLocation.latitude} longitude={userLocation.longitude}>
-          <div style={{ fontSize: 28 }}>📍</div>
+          <div style={{ fontSize: 28 }}>
+<MapPin size={28} color="#000000" fill="#2dd4bf" strokeWidth={1.5} />          </div>
         </Marker>
 
         {/* Court markers */}

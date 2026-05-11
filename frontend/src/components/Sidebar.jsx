@@ -1,7 +1,7 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import axios from 'axios'
-
+import { Home, MapPin, User, Settings, LogOut } from 'lucide-react'
 
 const BASE_URL = import.meta.env.VITE_API_URL
 
@@ -30,11 +30,11 @@ export default function Sidebar({ open, onClose }) {
       .catch(() => setIsLoggedIn(false))
   }, [])
 
-  const navItems = [
-    { icon: '🏠', label: 'Home', path: '/home' },
-    { icon: '📍', label: 'Courts', path: '/courts' },
-    { icon: '👤', label: 'Profile', path: '/profile' },
-  ]
+const navItems = [
+  { icon: <Home size={20} />, label: 'Home', path: '/home' },
+  { icon: <MapPin size={20} />, label: 'Courts', path: '/courts' },
+  { icon: <User size={20} />, label: 'Profile', path: '/profile' },
+]
 
   const handleNavigate = (path) => {
     navigate(path)
@@ -109,7 +109,7 @@ export default function Sidebar({ open, onClose }) {
               className="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
               style={{ background: 'rgba(255,255,255,0.07)' }}
             >
-              ⚙️
+              <Settings size={20} />
             </span>
             Admin
           </button>
@@ -127,7 +127,7 @@ export default function Sidebar({ open, onClose }) {
                 className="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
                 style={{ background: 'rgba(255,80,80,0.1)' }}
               >
-                🚪
+                <LogOut size={20} />
               </span>
               Log out
             </button>

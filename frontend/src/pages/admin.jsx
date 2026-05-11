@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { ChevronLeft } from 'lucide-react'
+
 
 const BASE_URL = import.meta.env.VITE_API_URL
 
@@ -134,7 +136,7 @@ export default function AdminPage() {
             onClick={() => navigate('/home')}
             className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white text-lg hover:bg-white/20 transition-colors"
           >
-            ‹
+              <ChevronLeft size={20} color="white" />
           </button>
           <h1 className="text-white text-xl font-bold">Admin Panel</h1>
         </div>

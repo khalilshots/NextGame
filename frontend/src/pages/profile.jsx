@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar'
+import { ChevronLeft, LogOut } from 'lucide-react'
+
 
 const BASE_URL = import.meta.env.VITE_API_URL
 
@@ -96,7 +98,7 @@ export default function ProfilePage() {
             onClick={() => navigate('/home')}
             className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white text-lg hover:bg-white/20 transition-colors"
           >
-            ‹
+              <ChevronLeft size={20} color="white" />
           </button>
           <button
             onClick={() => setSidebarOpen(true)}
@@ -239,12 +241,13 @@ export default function ProfilePage() {
         </div>
 
         {/* Logout */}
-        <button
-          onClick={handleLogout}
-          className="w-full py-4 rounded-2xl border border-red-200 bg-red-50 text-red-500 text-sm font-semibold hover:bg-red-100 transition-colors"
-        >
-          🚪 Log out
-        </button>
+    <button
+      onClick={handleLogout}
+      className="w-full py-4 rounded-2xl border border-red-200 bg-red-50 text-red-500 text-sm font-semibold hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+    >
+      <LogOut size={18} />
+      Log out
+    </button>
 
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import { useState } from 'react'
+import { MapPin, User, ChevronRight } from 'lucide-react'
 
 export default function MenuPage() {
   const navigate = useNavigate()
@@ -25,7 +26,7 @@ export default function MenuPage() {
             </svg>
           </button>
         </div>
-        <p className="text-teal-400 text-sm font-semibold mb-1">Welcome back 👋</p>
+        <p className="text-teal-400 text-sm font-semibold mb-1">Welcome back </p>
         <h1 className="text-white text-3xl font-extrabold tracking-tight">
           Next<span className="text-teal-400">Game</span>
         </h1>
@@ -40,13 +41,15 @@ export default function MenuPage() {
           className="w-full bg-white rounded-2xl shadow-sm px-5 py-5 flex items-center gap-4 hover:bg-gray-50 active:scale-95 transition-all text-left"
         >
           <div className="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center text-2xl flex-shrink-0">
-            📍
+              <MapPin size={24} className="text-teal-700" />
           </div>
           <div>
             <p className="text-base font-bold text-gray-900">Courts</p>
             <p className="text-xs text-gray-400 mt-0.5">Find courts near you</p>
           </div>
-          <span className="ml-auto text-gray-300 text-lg">›</span>
+          <span className="ml-auto text-gray-300 text-lg">
+            <ChevronRight size={20} className="text-gray-300 ml-auto" />
+          </span>
         </button>
 
         <button
@@ -54,13 +57,15 @@ export default function MenuPage() {
           className="w-full bg-white rounded-2xl shadow-sm px-5 py-5 flex items-center gap-4 hover:bg-gray-50 active:scale-95 transition-all text-left"
         >
           <div className="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center text-2xl flex-shrink-0">
-            👤
+              <User size={24} className="text-teal-700" />
           </div>
           <div>
             <p className="text-base font-bold text-gray-900">Profile</p>
             <p className="text-xs text-gray-400 mt-0.5">Your stats and bio</p>
           </div>
-          <span className="ml-auto text-gray-300 text-lg">›</span>
+          <span className="ml-auto text-gray-300 text-lg">
+            <ChevronRight size={20} className="text-gray-300 ml-auto" />
+          </span>
         </button>
 
       </div>
