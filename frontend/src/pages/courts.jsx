@@ -26,7 +26,8 @@ function RequestCourtModal({ coords, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     const token = localStorage.getItem('token')
-    if (!token) {
+    if (!token || token === 'undefined') {
+      localStorage.removeItem('token')
       navigate('/login')
       return
     }
