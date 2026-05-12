@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar'
-import { ChevronLeft, LogOut, Settings, KeyRound, Trash2, X, Menu } from 'lucide-react'
+import { ChevronLeft, LogOut, Settings, KeyRound, Trash2, X, Menu, MessageSquare } from 'lucide-react'
 
 const BASE_URL = import.meta.env.VITE_API_URL
 
@@ -31,18 +31,26 @@ const updateProfile = async ({ bio, profile_picture }) => {
 
 // TODO: move these to auth.js for modularity
 const changePassword = async (current_password, new_password) => {
+  const params = new URLSearchParams({ current_password, new_password })
   const res = await axios.patch(
-    `${BASE_URL}/users/me/password`,
-    { current_password, new_password },
+    `${BASE_URL}/users/me/password?${params.toString()}`,
+    {},
     authHeaders()
   )
   return res.data
 }
 
-
-
 const deleteAccount = async () => {
-  await axios.delete(`${BASE_URL}/users/me/delete`, authHeaders())
+  await axios.delete(`${BASE_URL}/users/me`, authHeaders())
+}
+
+const sendFeedback = async (type, message) => {
+  const res = await axios.post(
+    `${BASE_URL}/me/feedback`,
+    { type, message },
+    authHeaders()
+  )
+  return res.data
 }
 
 // ───────────────────────────────────────────────
@@ -58,7 +66,7 @@ function SheetBackdrop({ onClose }) {
   )
 }
 
-function SettingsModal({ onClose, onChangePassword, onDeleteAccount }) {
+function SettingsModal({ onClose, onChangePassword, onSendFeedback, onDeleteAccount }) {
   return (
     <>
       <SheetBackdrop onClose={onClose} />
@@ -79,6 +87,16 @@ function SettingsModal({ onClose, onChangePassword, onDeleteAccount }) {
               <KeyRound size={18} className="text-teal-700" />
             </div>
             <span className="text-sm font-semibold text-gray-900 flex-1">Change password</span>
+            <span className="text-gray-300 text-lg">›</span>
+          </button>
+          <button
+            onClick={onSendFeedback}
+            className="flex items-center gap-3 px-3 py-3.5 rounded-xl hover:bg-gray-50 transition-colors text-left"
+          >
+            <div className="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center">
+              <MessageSquare size={18} className="text-indigo-700" />
+            </div>
+            <span className="text-sm font-semibold text-gray-900 flex-1">Send feedback</span>
             <span className="text-gray-300 text-lg">›</span>
           </button>
           <button
@@ -125,7 +143,7 @@ function ChangePasswordModal({ onClose, onSuccess }) {
         onSuccess?.()
       }, 1500)
     } catch (err) {
-      setError(err?.response?.data?.detail || 'failed', err)
+      setError(err?.response?.data?.detail || 'Failed to change password.')
     } finally {
       setSubmitting(false)
     }
@@ -197,6 +215,121 @@ function ChangePasswordModal({ onClose, onSuccess }) {
   )
 }
 
+function FeedbackModal({ onClose }) {
+  const [type, setType] = useState('bug')
+  const [message, setMessage] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState(null)
+  const [success, setSuccess] = useState(false)
+
+  const MAX_LEN = 500
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError(null)
+    if (message.trim().length < 5) {
+      setError('Please write a bit more so we can understand the issue.')
+      return
+    }
+    try {
+      setSubmitting(true)
+      await sendFeedback(type, message.trim())
+      setSuccess(true)
+      setTimeout(() => onClose(), 1500)
+    } catch (err) {
+      console.error('Feedback submit failed:', err)
+      setError(err?.response?.data?.detail || 'Failed to send feedback. Please try again.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const types = [
+    { key: 'bug', label: 'Bug' },
+    { key: 'suggestion', label: 'Idea' },
+    { key: 'other', label: 'Other' },
+  ]
+
+  return (
+    <>
+      <SheetBackdrop onClose={onClose} />
+      <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl z-[101] px-5 pt-3 pb-10 shadow-2xl">
+        <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-lg font-bold text-gray-900">Send Feedback</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X size={20} />
+          </button>
+        </div>
+
+        {success ? (
+          <div className="text-center py-6">
+            <p className="text-sm font-semibold text-gray-700">Thanks! we got it!</p>
+            <p className="text-xs text-gray-400 mt-1">We'll take a look soon.</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            {/* Type selector */}
+            <div>
+              <label className="text-xs font-semibold text-gray-600 block mb-2">What kind of feedback?</label>
+              <div className="grid grid-cols-3 gap-2">
+                {types.map(t => (
+                  <button
+                    key={t.key}
+                    type="button"
+                    onClick={() => setType(t.key)}
+                    className={`py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                      type === t.key
+                        ? 'bg-teal-900 text-white'
+                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Message */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-semibold text-gray-600">Tell us more</label>
+                <span className={`text-[10px] ${message.length > MAX_LEN - 50 ? 'text-amber-600' : 'text-gray-400'}`}>
+                  {message.length}/{MAX_LEN}
+                </span>
+              </div>
+              <textarea
+                value={message}
+                onChange={e => setMessage(e.target.value.slice(0, MAX_LEN))}
+                placeholder={
+                  type === 'bug'
+                    ? "What broke? What were you doing when it happened?"
+                    : type === 'suggestion'
+                    ? "What would make this app better for you?"
+                    : "What's on your mind?"
+                }
+                rows={4}
+                required
+                className="w-full text-sm bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 resize-none outline-none focus:border-teal-400 transition-colors"
+              />
+            </div>
+
+            {error && <p className="text-xs text-red-600">{error}</p>}
+
+            <button
+              type="submit"
+              disabled={submitting || message.trim().length === 0}
+              className="w-full py-3 rounded-xl bg-teal-900 hover:bg-teal-800 text-white text-sm font-bold transition-colors disabled:opacity-40"
+            >
+              {submitting ? 'Sending...' : 'Send feedback'}
+            </button>
+          </form>
+        )}
+      </div>
+    </>
+  )
+}
+
 function DeleteAccountModal({ onClose, onConfirm }) {
   const [confirmText, setConfirmText] = useState('')
   const canDelete = confirmText.toLowerCase() === 'delete'
@@ -250,6 +383,7 @@ export default function ProfilePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [showChangePassword, setShowChangePassword] = useState(false)
+  const [showFeedback, setShowFeedback] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const [bio, setBio] = useState('')
@@ -422,7 +556,7 @@ export default function ProfilePage() {
             </div>
           ) : (
             <p className={`text-sm leading-relaxed ${bio ? 'text-gray-700' : 'text-gray-400 italic'}`}>
-              {bio || 'No bio yet — tap "+ Add bio" to introduce yourself.'}
+              {bio || 'Heart > Height'}
             </p>
           )}
         </div>
@@ -486,6 +620,7 @@ export default function ProfilePage() {
         <SettingsModal
           onClose={() => setShowSettings(false)}
           onChangePassword={() => { setShowSettings(false); setShowChangePassword(true) }}
+          onSendFeedback={() => { setShowSettings(false); setShowFeedback(true) }}
           onDeleteAccount={() => { setShowSettings(false); setShowDeleteConfirm(true) }}
         />
       )}
@@ -493,6 +628,12 @@ export default function ProfilePage() {
       {showChangePassword && (
         <ChangePasswordModal
           onClose={() => setShowChangePassword(false)}
+        />
+      )}
+
+      {showFeedback && (
+        <FeedbackModal
+          onClose={() => setShowFeedback(false)}
         />
       )}
 

@@ -217,7 +217,7 @@ export default function CourtDetail() {
                 <Camera size={28} className="text-white/50" />
 
             </div>
-            <p className="text-white/50 text-sm">No photos yet</p>
+            <p className="text-white/50 text-sm">No photos yet (this feature is coming soon)</p>
             {/*
             <button className="px-5 py-2 rounded-full border border-white/30 bg-white/10 text-white text-sm font-semibold backdrop-blur hover:bg-white/20 transition-colors">
               + Add Images
