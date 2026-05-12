@@ -230,14 +230,22 @@ def update_profile(data: schemas.UserUpdate, db: db_dependency, current_user: Us
     db.commit()
     return current_user
 
-@app.patch("/users/me/password", response_model=schemas.PasswordChange)
+
+@app.patch("/users/me/password")  # removed response_model
 def change_password(data: schemas.PasswordChange, db: db_dependency, current_user: User = Depends(get_current_user)):
     if not verify_password(data.current_password, current_user.hashed_password):
         raise HTTPException(status_code=400, detail="Current password is incorrect")
-    
     if verify_password(data.new_password, current_user.hashed_password):
-        raise HTTPException(status_code=400, detail="CurrNew password cannot be the same as your current password")
-
+        raise HTTPException(status_code=400, detail="New password cannot be the same as your current password")
     current_user.hashed_password = hash_password(data.new_password)
     db.commit()
-    return current_user
+    return {"message": "Password updated successfully"}
+
+@app.delete("/users/me/delete")
+def delete_account(db: db_dependency, current_user: User = Depends(get_current_user)):
+    # First, delete all check-ins by the user
+    db.query(CheckIn).filter(CheckIn.user_id == current_user.id).delete()
+    # Then delete the user account
+    db.delete(current_user)
+    db.commit()
+    return {"ok": True}
