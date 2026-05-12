@@ -34,3 +34,14 @@ class UserResponse(BaseModel):
     
     class Config:
         from_attributes = True
+
+
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str
+
+    @field_validator('new_password')
+    def password_length(cls, v):
+        if len(v) < 6:
+            raise ValueError('Password must be at least 6 characters')
+        return v

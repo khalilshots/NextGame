@@ -230,3 +230,14 @@ def update_profile(data: schemas.UserUpdate, db: db_dependency, current_user: Us
     db.commit()
     return current_user
 
+@app.patch("/users/me/password", response_model=schemas.PasswordChange)
+def change_password(data: schemas.PasswordChange, db: db_dependency, current_user: User = Depends(get_current_user)):
+    if not verify_password(data.current_password, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    
+    if verify_password(data.new_password, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="CurrNew password cannot be the same as your current password")
+
+    current_user.hashed_password = hash_password(data.new_password)
+    db.commit()
+    return current_user
