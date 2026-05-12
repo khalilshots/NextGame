@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import Sidebar from '../components/Sidebar'
-import { ChevronLeft, LogOut } from 'lucide-react'
-
+import { ChevronLeft, LogOut, Settings, KeyRound, Trash2, X, Menu } from 'lucide-react'
 
 const BASE_URL = import.meta.env.VITE_API_URL
 
@@ -22,16 +21,237 @@ const getMyCheckins = async () => {
 }
 
 const updateProfile = async ({ bio, profile_picture }) => {
-  const res = await axios.patch(`${BASE_URL}/users/me`, { bio, profile_picture }, authHeaders())
+  const res = await axios.patch(
+    `${BASE_URL}/users/me`,
+    { bio, profile_picture },
+    authHeaders()
+  )
   return res.data
 }
 
+// TODO: move these to auth.js for modularity
+const changePassword = async (current_password, new_password) => {
+  const res = await axios.patch(
+    `${BASE_URL}/users/me/password`,
+    { current_password, new_password },
+    authHeaders()
+  )
+  return res.data
+}
+
+
+
+const deleteAccount = async () => {
+  await axios.delete(`${BASE_URL}/users/me/delete`, authHeaders())
+}
+
+// ───────────────────────────────────────────────
+// Modals
+// ───────────────────────────────────────────────
+
+function SheetBackdrop({ onClose }) {
+  return (
+    <div
+      onClick={onClose}
+      className="fixed inset-0 bg-black/50 z-[100]"
+    />
+  )
+}
+
+function SettingsModal({ onClose, onChangePassword, onDeleteAccount }) {
+  return (
+    <>
+      <SheetBackdrop onClose={onClose} />
+      <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl z-[101] px-5 pt-3 pb-10 shadow-2xl">
+        <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-gray-900">Settings</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X size={20} />
+          </button>
+        </div>
+        <div className="flex flex-col gap-1">
+          <button
+            onClick={onChangePassword}
+            className="flex items-center gap-3 px-3 py-3.5 rounded-xl hover:bg-gray-50 transition-colors text-left"
+          >
+            <div className="w-9 h-9 rounded-xl bg-teal-50 flex items-center justify-center">
+              <KeyRound size={18} className="text-teal-700" />
+            </div>
+            <span className="text-sm font-semibold text-gray-900 flex-1">Change password</span>
+            <span className="text-gray-300 text-lg">›</span>
+          </button>
+          <button
+            onClick={onDeleteAccount}
+            className="flex items-center gap-3 px-3 py-3.5 rounded-xl hover:bg-red-50 transition-colors text-left"
+          >
+            <div className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center">
+              <Trash2 size={18} className="text-red-600" />
+            </div>
+            <span className="text-sm font-semibold text-red-600 flex-1">Delete account</span>
+            <span className="text-gray-300 text-lg">›</span>
+          </button>
+        </div>
+      </div>
+    </>
+  )
+}
+
+function ChangePasswordModal({ onClose, onSuccess }) {
+  const [current, setCurrent] = useState('')
+  const [next, setNext] = useState('')
+  const [confirm, setConfirm] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState(null)
+  const [success, setSuccess] = useState(false)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError(null)
+    if (next !== confirm) {
+      setError('Passwords do not match.')
+      return
+    }
+    if (next.length < 6) {
+      setError('Password must be at least 6 characters.')
+      return
+    }
+    try {
+      setSubmitting(true)
+      await changePassword(current, next)
+      setSuccess(true)
+      setTimeout(() => {
+        onClose()
+        onSuccess?.()
+      }, 1500)
+    } catch (err) {
+      setError(err?.response?.data?.detail || 'failed', err)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <>
+      <SheetBackdrop onClose={onClose} />
+      <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl z-[101] px-5 pt-3 pb-10 shadow-2xl">
+        <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-lg font-bold text-gray-900">Change Password</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X size={20} />
+          </button>
+        </div>
+
+        {success ? (
+          <div className="text-center py-6">
+            <div className="text-4xl mb-2">✅</div>
+            <p className="text-sm font-semibold text-gray-700">Password updated!</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+            <div>
+              <label className="text-xs font-semibold text-gray-600 block mb-1.5">Current password</label>
+              <input
+                type="password"
+                value={current}
+                onChange={e => setCurrent(e.target.value)}
+                required
+                className="w-full text-sm bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 outline-none focus:border-teal-400 transition-colors"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-gray-600 block mb-1.5">New password</label>
+              <input
+                type="password"
+                value={next}
+                onChange={e => setNext(e.target.value)}
+                required
+                className="w-full text-sm bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 outline-none focus:border-teal-400 transition-colors"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-gray-600 block mb-1.5">Confirm new password</label>
+              <input
+                type="password"
+                value={confirm}
+                onChange={e => setConfirm(e.target.value)}
+                required
+                className="w-full text-sm bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 outline-none focus:border-teal-400 transition-colors"
+              />
+            </div>
+
+            {error && <p className="text-xs text-red-600">{error}</p>}
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full py-3 rounded-xl bg-teal-900 hover:bg-teal-800 text-white text-sm font-bold transition-colors disabled:opacity-50 mt-2"
+            >
+              {submitting ? 'Updating...' : 'Update password'}
+            </button>
+          </form>
+        )}
+      </div>
+    </>
+  )
+}
+
+function DeleteAccountModal({ onClose, onConfirm }) {
+  const [confirmText, setConfirmText] = useState('')
+  const canDelete = confirmText.toLowerCase() === 'delete'
+
+  return (
+    <>
+      <SheetBackdrop onClose={onClose} />
+      <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl z-[101] px-5 pt-3 pb-10 shadow-2xl">
+        <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-bold text-red-600">Delete Account</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X size={20} />
+          </button>
+        </div>
+        <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+          This will permanently delete your account, bio, and check-in history.
+          This action cannot be undone. Type{' '}
+          <span className="font-bold text-gray-900">delete</span> to confirm.
+        </p>
+        <input
+          type="text"
+          value={confirmText}
+          onChange={e => setConfirmText(e.target.value)}
+          placeholder="Type 'delete' to confirm"
+          className="w-full text-sm bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 outline-none focus:border-red-400 transition-colors mb-4"
+        />
+        <button
+          onClick={onConfirm}
+          disabled={!canDelete}
+          className="w-full py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          Delete my account
+        </button>
+      </div>
+    </>
+  )
+}
+
+// ───────────────────────────────────────────────
+// Profile Page
+// ───────────────────────────────────────────────
+
 export default function ProfilePage() {
   const navigate = useNavigate()
+
   const [me, setMe] = useState(null)
   const [checkins, setCheckins] = useState([])
   const [loading, setLoading] = useState(true)
+
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
+  const [showChangePassword, setShowChangePassword] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
   const [bio, setBio] = useState('')
   const [editingBio, setEditingBio] = useState(false)
   const [draftBio, setDraftBio] = useState('')
@@ -89,30 +309,41 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} activePage="profile" />
+      <Sidebar
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        activePage="profile"
+      />
 
       {/* Header */}
       <div className="bg-teal-950 px-5 pt-14 pb-10 relative">
         <div className="flex items-center justify-between mb-6">
+          {/* Left: back button */}
           <button
             onClick={() => navigate('/home')}
-            className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white text-lg hover:bg-white/20 transition-colors"
-          >
-              <ChevronLeft size={20} color="white" />
-          </button>
-          <button
-            onClick={() => setSidebarOpen(true)}
             className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
           >
-            <svg width="14" height="11" viewBox="0 0 16 12" fill="none">
-              <rect width="16" height="2" rx="1" fill="white"/>
-              <rect y="5" width="11" height="2" rx="1" fill="white"/>
-              <rect y="10" width="16" height="2" rx="1" fill="white"/>
-            </svg>
+            <ChevronLeft size={20} color="white" />
           </button>
+
+          {/* Right: settings + hamburger */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowSettings(true)}
+              className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+            >
+              <Settings size={18} color="white" />
+            </button>
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+            >
+              <Menu size={18} color="white" />
+            </button>
+          </div>
         </div>
 
-        {/* Avatar */}
+        {/* Avatar + name */}
         <div className="flex flex-col items-center gap-3">
           <div className="w-24 h-24 rounded-full bg-teal-700 flex items-center justify-center text-white text-3xl font-bold border-4 border-teal-800 shadow-lg">
             {getInitials(me?.username)}
@@ -169,7 +400,7 @@ export default function ProfilePage() {
               <textarea
                 value={draftBio}
                 onChange={e => setDraftBio(e.target.value)}
-                placeholder="Tell people a little about yourself...(location, age, height, years of playing, etc.)"
+                placeholder="Tell people a little about yourself... (location, age, height, years playing, etc.)"
                 maxLength={160}
                 rows={3}
                 className="w-full text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 resize-none outline-none focus:border-teal-400 transition-colors"
@@ -183,15 +414,15 @@ export default function ProfilePage() {
                 </button>
                 <button
                   onClick={handleSaveBio}
-                  className="flex-2 flex-1 py-2 rounded-xl bg-teal-900 text-white text-sm font-semibold hover:bg-teal-800 transition-colors"
+                  className="flex-1 py-2 rounded-xl bg-teal-900 text-white text-sm font-semibold hover:bg-teal-800 transition-colors"
                 >
                   Save
                 </button>
               </div>
             </div>
           ) : (
-            <p className="text-sm text-gray-500 leading-relaxed">
-              {bio || 'heart > height'}
+            <p className={`text-sm leading-relaxed ${bio ? 'text-gray-700' : 'text-gray-400 italic'}`}>
+              {bio || 'No bio yet — tap "+ Add bio" to introduce yourself.'}
             </p>
           )}
         </div>
@@ -241,15 +472,44 @@ export default function ProfilePage() {
         </div>
 
         {/* Logout */}
-    <button
-      onClick={handleLogout}
-      className="w-full py-4 rounded-2xl border border-red-200 bg-red-50 text-red-500 text-sm font-semibold hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
-    >
-      <LogOut size={18} />
-      Log out
-    </button>
-
+        <button
+          onClick={handleLogout}
+          className="w-full py-4 rounded-2xl border border-red-200 bg-red-50 text-red-500 text-sm font-semibold hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+        >
+          <LogOut size={18} />
+          Log out
+        </button>
       </div>
+
+      {/* Settings modal */}
+      {showSettings && (
+        <SettingsModal
+          onClose={() => setShowSettings(false)}
+          onChangePassword={() => { setShowSettings(false); setShowChangePassword(true) }}
+          onDeleteAccount={() => { setShowSettings(false); setShowDeleteConfirm(true) }}
+        />
+      )}
+
+      {showChangePassword && (
+        <ChangePasswordModal
+          onClose={() => setShowChangePassword(false)}
+        />
+      )}
+
+      {showDeleteConfirm && (
+        <DeleteAccountModal
+          onClose={() => setShowDeleteConfirm(false)}
+          onConfirm={async () => {
+            try {
+              await deleteAccount()
+              localStorage.removeItem('token')
+              navigate('/login')
+            } catch (err) {
+              alert(`Failed to delete account: ${err?.response?.data?.detail || 'Unknown error'}`)
+            }
+          }}
+        />
+      )}
     </div>
   )
 }
