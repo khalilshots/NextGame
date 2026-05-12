@@ -218,9 +218,11 @@ export default function CourtDetail() {
 
             </div>
             <p className="text-white/50 text-sm">No photos yet</p>
+            {/*
             <button className="px-5 py-2 rounded-full border border-white/30 bg-white/10 text-white text-sm font-semibold backdrop-blur hover:bg-white/20 transition-colors">
               + Add Images
             </button>
+            */}
           </div>
         )}
       </div>

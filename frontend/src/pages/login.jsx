@@ -6,6 +6,8 @@ import { Checkbox } from "../components/ui/checkbox"
 import { Link } from 'react-router-dom'
 import { loginUser } from '../api/auth'
 import { useNavigate } from 'react-router-dom'
+import { GoogleLogin } from '@react-oauth/google'
+import axios from 'axios'
 
 
 export default function LoginPage() {
@@ -14,6 +16,21 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState(null)
   const navigate = useNavigate()
+
+  const BASE_URL = import.meta.env.VITE_API_URL
+
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+  try {
+    const { data } = await axios.post(`${BASE_URL}/auth/google`, {
+      credential: credentialResponse.credential
+    })
+    localStorage.setItem('token', data.access_token)
+    navigate('/home')
+  } catch (err) {
+    setError('Google sign-in failed. Please try again.', err)
+  }
+}
 
 const handleSubmit = async e => {
   e.preventDefault()
@@ -108,6 +125,20 @@ const handleGuest = () => {
         >
           Continue as Guest
         </Button>
+
+                <div className="flex items-center gap-3 my-4">
+          <div className="flex-1 h-px bg-gray-200"/>
+          <span className="text-xs text-gray-400">or</span>
+          <div className="flex-1 h-px bg-gray-200"/>
+        </div>
+
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          onError={() => setError('Google sign-in failed.')}
+          width="100%"
+          shape="rectangular"
+          theme="outline"
+        />
 
       </form>
     </div>
