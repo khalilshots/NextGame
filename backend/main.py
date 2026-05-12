@@ -14,9 +14,14 @@ from sqlalchemy.orm import Session
 from datetime import datetime, timezone
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime, timezone, timedelta
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+import os
 
 
 TWO_HOURS = timedelta(hours=2)
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+
 
 app = FastAPI()
 models.Base.metadata.create_all(bind=engine)
@@ -57,6 +62,39 @@ def login(db: db_dependency, form_data: OAuth2PasswordRequestForm = Depends()):
     user = db.query(User).filter(User.username == form_data.username).first()
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    token = create_access_token({"sub": user.username})
+    return {"access_token": token, "token_type": "bearer"}
+
+
+
+@app.post("/auth/google")
+def google_login(token: dict, db: db_dependency):
+    try:
+        # Verify the token with Google
+        idinfo = id_token.verify_oauth2_token(
+            token["credential"],
+            google_requests.Request(),
+            GOOGLE_CLIENT_ID
+        )
+    except ValueError:
+        raise HTTPException(status_code=401, detail="Invalid Google token")
+
+    email = idinfo["email"]
+    name = idinfo.get("name", email.split("@")[0])
+
+    # Find existing user or create new one
+    user = db.query(User).filter(User.username == email).first()
+    if not user:
+        user = User(
+            username=email,
+            hashed_password="",  # no password for OAuth users
+            is_admin=False
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+    # Return your normal JWT token
     token = create_access_token({"sub": user.username})
     return {"access_token": token, "token_type": "bearer"}
 
