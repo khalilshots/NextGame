@@ -17,6 +17,7 @@ from datetime import datetime, timezone, timedelta
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 import os
+from models import Feedback
 
 
 TWO_HOURS = timedelta(hours=2)
@@ -116,6 +117,7 @@ def get_pending_courts(db: db_dependency, current_user: User = Depends(get_curre
         raise HTTPException(status_code=403, detail="Admins only.")
     courts = db.query(Court).filter(Court.status == "pending").all()
     return courts
+
 
 @app.delete("/courts/{court_id}")
 def delete_court(court_id: int, db: db_dependency, current_user: User = Depends(get_current_user)):
@@ -287,3 +289,67 @@ def delete_account(db: db_dependency, current_user: User = Depends(get_current_u
     db.delete(current_user)
     db.commit()
     return {"ok": True}
+
+"""
+
+POST   /feedback                     → body: { type, message }
+GET    /admin/feedback                → returns: [{ id, type, message, user_id, username, created_at, resolved }]
+PATCH  /admin/feedback/{id}           → body: { resolved: true }
+"""
+
+
+@app.post("/me/feedback")
+def submit_feedback(
+    data: schemas.FeedbackCreate,
+    db: db_dependency,
+    current_user: User = Depends(get_current_user)
+):
+    if data.type not in ("bug", "suggestion", "other"):
+        raise HTTPException(status_code=400, detail="Invalid feedback type")
+    feedback = Feedback(
+        user_id=current_user.id,
+        type=data.type,
+        message=data.message
+    )
+    db.add(feedback)
+    db.commit()
+    return {"message": "Feedback received"}
+
+
+@app.get("/admin/feedback")
+def get_feedback(
+    db: db_dependency,
+    current_user: User = Depends(get_current_user)
+):
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admins only")
+    items = db.query(Feedback).order_by(Feedback.created_at.desc()).all()
+    return [
+        {
+            "id": f.id,
+            "type": f.type,
+            "message": f.message,
+            "user_id": f.user_id,
+            "username": f.user.username,
+            "resolved": f.resolved,
+            "created_at": f.created_at,
+        }
+        for f in items
+    ]
+
+
+@app.patch("/admin/feedback/{feedback_id}")
+def update_feedback(
+    feedback_id: int,
+    data: schemas.FeedbackUpdate,
+    db: db_dependency,
+    current_user: User = Depends(get_current_user)
+):
+    if not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Admins only")
+    feedback = db.query(Feedback).filter(Feedback.id == feedback_id).first()
+    if not feedback:
+        raise HTTPException(status_code=404, detail="Feedback not found")
+    feedback.resolved = data.resolved
+    db.commit()
+    return {"message": "Updated"}

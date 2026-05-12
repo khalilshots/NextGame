@@ -1,7 +1,7 @@
 # schemas.py
 from pydantic import BaseModel
 from pydantic import field_validator
-
+import datetime
 
 class RegisterRequest(BaseModel):
     username: str
@@ -45,3 +45,22 @@ class PasswordChange(BaseModel):
         if len(v) < 6:
             raise ValueError('Password must be at least 6 characters')
         return v
+    
+class FeedbackCreate(BaseModel):
+    type: str
+    message: str
+
+class FeedbackResponse(BaseModel):
+    id: int
+    type: str
+    message: str
+    user_id: int
+    username: str
+    resolved: bool
+    created_at: datetime.datetime
+
+    class Config:
+        from_attributes = True
+
+class FeedbackUpdate(BaseModel):
+    resolved: bool

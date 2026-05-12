@@ -39,3 +39,14 @@ class CheckIn(Base):
     checkin_time: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
     checkedout_time: Mapped[Optional[datetime]] = mapped_column(default=None)
     created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
+
+class Feedback(Base):
+    __tablename__ = "feedback"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    user: Mapped[User] = relationship("User")
+    type: Mapped[str] = mapped_column()
+    message: Mapped[str] = mapped_column()
+    resolved: Mapped[bool] = mapped_column(default=False)
+    created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
