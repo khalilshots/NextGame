@@ -353,3 +353,5 @@ def update_feedback(
     feedback.resolved = data.resolved
     db.commit()
     return {"message": "Updated"}
+
+
